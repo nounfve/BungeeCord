@@ -204,6 +204,25 @@ public class YamlConfig implements ConfigurationAdapter
         return get( path, def );
     }
 
+    @SuppressWarnings("unchecked")
+    public String getServerHost(String name)
+    {
+        Map<String, Map<String, Object>> base = get( "servers", (Map) Collections.singletonMap( "lobby", new HashMap<>() ) );
+        String ret = new String();
+
+        for ( Map.Entry<String, Map<String, Object>> entry : base.entrySet() )
+        {
+            if ( name == entry.getKey() )
+            {
+                Map<String, Object> val = entry.getValue();
+                ret = get( "address", "localhost:25565", val );
+                ret = ret.split( ":" )[0];
+                break;
+            }
+        }
+        return ret;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, ServerInfo> getServers()

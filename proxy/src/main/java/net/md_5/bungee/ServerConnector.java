@@ -24,6 +24,7 @@ import net.md_5.bungee.api.score.Score;
 import net.md_5.bungee.api.score.Scoreboard;
 import net.md_5.bungee.api.score.Team;
 import net.md_5.bungee.chat.ComponentSerializer;
+import net.md_5.bungee.conf.YamlConfig;
 import net.md_5.bungee.connection.CancelSendSignal;
 import net.md_5.bungee.connection.DownstreamBridge;
 import net.md_5.bungee.connection.LoginResult;
@@ -102,10 +103,11 @@ public class ServerConnector extends PacketHandler
         this.handshakeHandler = new ForgeServerHandler( user, ch, target );
         Handshake originalHandshake = user.getPendingConnection().getHandshake();
         Handshake copiedHandshake = new Handshake( originalHandshake.getProtocolVersion(), originalHandshake.getHost(), originalHandshake.getPort(), 2 );
+        YamlConfig config = (YamlConfig) ProxyServer.getInstance().getConfigurationAdapter();
 
         if ( BungeeCord.getInstance().config.isIpForward() && user.getSocketAddress() instanceof InetSocketAddress )
         {
-            String newHost = copiedHandshake.getHost() + "\00" + AddressUtil.sanitizeAddress( user.getAddress() ) + "\00" + user.getUUID();
+            String newHost = config.getServerHost( target.getName() ) + "\00" + AddressUtil.sanitizeAddress( user.getAddress() ) + "\00" + user.getUUID();
 
             LoginResult profile = user.getPendingConnection().getLoginProfile();
             if ( profile != null && profile.getProperties() != null && profile.getProperties().length > 0 )
@@ -117,7 +119,7 @@ public class ServerConnector extends PacketHandler
         {
             // Only restore the extra data if IP forwarding is off.
             // TODO: Add support for this data with IP forwarding.
-            copiedHandshake.setHost( copiedHandshake.getHost() + user.getExtraDataInHandshake() );
+            copiedHandshake.setHost( config.getServerHost( target.getName() ) + user.getExtraDataInHandshake() );
         }
 
         channel.write( copiedHandshake );
